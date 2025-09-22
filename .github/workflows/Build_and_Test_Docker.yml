@@ -2,15 +2,16 @@ name: 构建和测试 Docker 镜像
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
     paths:
       - 'src/**'
       - 'webui/**'
       - 'Dockerfile'
       - 'requirements.txt'
       - 'pyproject.toml'
+      - '.github/workflows/**'
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
     paths:
       - 'src/**'
       - 'webui/**'
