@@ -1,0 +1,137 @@
+#!/bin/bash
+
+# 群晖 NAS 专用部署脚本
+# Synology NAS specific deployment script
+
+set -e
+
+# 颜色定义
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+# 检查并创建群晖目录
+setup_synology_directories() {
+    local base_path="/volume1/docker/douyin"
+    
+    log_info "创建群晖NAS目录结构..."
+    
+    # 创建主目录
+    sudo mkdir -p "$base_path"
+    sudo mkdir -p "$base_path/Volume/Download/douyin/live_records"
+    sudo mkdir -p "$base_path/Volume/Download/douyin/audio"
+    sudo mkdir -p "$base_path/Volume/Download/douyin/videos"
+    sudo mkdir -p "$base_path/Volume/Download/douyin/images"
+    sudo mkdir -p "$base_path/Volume/Data"
+    sudo mkdir -p "$base_path/Volume/Cache"
+    sudo mkdir -p "$base_path/config"
+    
+    # 设置权限
+    sudo chown -R 1000:1000 "$base_path"
+    sudo chmod -R 755 "$base_path"
+    
+    log_success "群晖目录创建完成: $base_path"
+}
+
+# 生成默认配置
+create_default_config() {
+    local config_path="/volume1/docker/douyin/config/settings.json"
+    
+    if [ ! -f "$config_path" ]; then
+        log_info "创建默认配置文件..."
+        
+        sudo tee "$config_path" > /dev/null << 'CONFIG_EOF'
+{
+    "root": "/app/Volume",
+    "folder_name": "Download",
+    "name_format": "create_time nickname desc",
+    "date_format": "%Y-%m-%d %H:%M:%S",
+    "split": "-",
+    "folder_mode": false,
+    "music": false,
+    "storage_format": "",
+    "cookie": "",
+    "dynamic_cover": false,
+    "original_cover": false,
+    "proxy": "",
+    "download": 1,
+    "max_size": 0,
+    "chunk": 1048576,
+    "max_retry": 5,
+    "record_data": false,
+    "owner_url": false,
+    "ffmpeg": "",
+    "thread": false
+}
+CONFIG_EOF
+        
+        sudo chown 1000:1000 "$config_path"
+        log_success "配置文件创建完成"
+    else
+        log_info "配置文件已存在，跳过创建"
+    fi
+}
+
+# 显示使用说明
+show_usage() {
+    echo "群晖 NAS 部署脚本"
+    echo
+    echo "使用方法:"
+    echo "  1. 设置目录: sudo $0 setup"
+    echo "  2. 启动服务: $0 start"
+    echo "  3. 停止服务: $0 stop"
+    echo "  4. 查看日志: $0 logs"
+    echo "  5. 更新服务: $0 update"
+    echo
+    echo "注意: setup 命令需要 sudo 权限来创建目录"
+}
+
+# 主要操作
+case "${1:-help}" in
+    setup)
+        setup_synology_directories
+        create_default_config
+        log_success "群晖环境设置完成!"
+        log_info "现在可以运行 '$0 start' 启动服务"
+        ;;
+    start)
+        log_info "启动服务 (使用群晖配置)..."
+        docker-compose --env-file .env.synology up -d
+        log_success "服务已启动! 访问: http://localhost:5555"
+        ;;
+    stop)
+        log_info "停止服务..."
+        docker-compose --env-file .env.synology down
+        log_success "服务已停止"
+        ;;
+    logs)
+        docker-compose --env-file .env.synology logs -f
+        ;;
+    update)
+        log_info "更新服务..."
+        docker-compose --env-file .env.synology pull
+        docker-compose --env-file .env.synology up -d
+        log_success "服务已更新"
+        ;;
+    restart)
+        $0 stop
+        sleep 2
+        $0 start
+        ;;
+    *)
+        show_usage
+        ;;
+esac

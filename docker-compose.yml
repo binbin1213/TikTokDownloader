@@ -17,9 +17,9 @@ services:
     # 数据卷挂载 - 持久化数据
     volumes:
       # 主数据目录：下载文件、数据库、缓存等
-      - ./data/Volume:/app/Volume
+      - ${DATA_PATH:-./data}/Volume:/app/Volume
       # 配置目录：cookies、设置等
-      - ./data/config:/app/config
+      - ${DATA_PATH:-./data}/config:/app/config
     
     # 环境变量配置
     environment:
