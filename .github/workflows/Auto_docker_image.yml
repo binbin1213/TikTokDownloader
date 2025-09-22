@@ -51,9 +51,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=dev,enable={{is_default_branch}}
-            type=ref,event=branch,enable={{!is_default_branch}}
+            type=raw,value=latest
+            type=raw,value=dev
+            type=ref,event=branch
 
       - name: 构建和推送 Docker 镜像
         uses: docker/build-push-action@v6
