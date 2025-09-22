@@ -130,6 +130,15 @@ class APIServer(TikTok):
             return RedirectResponse(url=REPOSITORY)
 
         @self.server.get(
+            "/health",
+            summary=_("健康检查"),
+            description=_("检查服务是否正常运行"),
+            tags=[_("系统")],
+        )
+        async def health():
+            return {"status": "healthy", "service": "DouK-Downloader"}
+
+        @self.server.get(
             "/token",
             summary=_("测试令牌有效性"),
             description=_(
