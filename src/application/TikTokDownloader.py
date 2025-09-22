@@ -144,6 +144,9 @@ class TikTokDownloader:
 
     async def server(self):
         try:
+            # 初始化parameter（服务器模式需要）
+            await self.check_settings(False)
+            
             self.console.print(
                 _(
                     "访问 http://127.0.0.1:5555/docs 或者 http://127.0.0.1:5555/redoc 可以查阅 API 模式说明文档！"
