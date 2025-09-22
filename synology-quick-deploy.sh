@@ -78,8 +78,8 @@ main() {
     # 检查环境
     check_docker
     
-    # 创建工作目录
-    local work_dir="/volume1/docker/tiktok-downloader"
+    # 创建工作目录（与数据目录同级）
+    local work_dir="/volume1/docker/douyin"
     log_info "创建工作目录: $work_dir"
     mkdir -p "$work_dir"
     cd "$work_dir"
