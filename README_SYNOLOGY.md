@@ -2,6 +2,15 @@
 
 本文档专门为群晖 NAS 用户提供部署指导。
 
+## 💡 部署原理
+
+**为什么不需要下载完整代码？**
+
+- 🐳 **应用程序已打包在Docker镜像中** - 所有源代码、依赖都在 `ghcr.io/binbin1213/tiktokdownloader:latest`
+- 📋 **只需配置文件** - 仅需要 `docker-compose.yml`、`.env.synology` 和部署脚本
+- ⚡ **更快部署** - 无需下载几百MB的源码，只下载几KB的配置文件
+- 🔄 **自动更新** - 运行 `docker-compose pull` 即可获取最新镜像
+
 ## 🚀 快速部署
 
 ### 1. 前置要求
@@ -11,20 +20,45 @@
 
 ### 2. 部署步骤
 
+#### 方法一：一键部署（最简单）
+
 ```bash
-# 1. 下载项目文件到群晖
+# 只需一个命令，全自动部署
+wget -O- https://raw.githubusercontent.com/binbin1213/TikTokDownloader/master/synology-quick-deploy.sh | bash
+```
+
+#### 方法二：手动部署（推荐）
+
+```bash
+# 1. 创建工作目录
+mkdir -p /volume1/docker/tiktok-downloader
+cd /volume1/docker/tiktok-downloader
+
+# 2. 下载配置文件（只需要这几个文件）
+wget https://raw.githubusercontent.com/binbin1213/TikTokDownloader/master/docker-compose.yml
+wget https://raw.githubusercontent.com/binbin1213/TikTokDownloader/master/.env.synology
+wget https://raw.githubusercontent.com/binbin1213/TikTokDownloader/master/docker-deploy-synology.sh
+chmod +x docker-deploy-synology.sh
+
+# 3. 设置群晖环境
+sudo ./docker-deploy-synology.sh setup
+
+# 4. 启动服务
+./docker-deploy-synology.sh start
+
+# 5. 访问服务
+# 浏览器打开: http://你的群晖IP:5555
+```
+
+#### 方法三：完整克隆（开发者）
+
+```bash
+# 只有需要源码时才使用此方法
 cd /volume1/docker
 git clone https://github.com/binbin1213/TikTokDownloader.git
 cd TikTokDownloader
-
-# 2. 设置群晖环境（需要sudo权限）
 sudo ./docker-deploy-synology.sh setup
-
-# 3. 启动服务
 ./docker-deploy-synology.sh start
-
-# 4. 访问服务
-# 浏览器打开: http://你的群晖IP:5555
 ```
 
 ### 3. 常用命令
