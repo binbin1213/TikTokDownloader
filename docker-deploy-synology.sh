@@ -109,21 +109,21 @@ case "${1:-help}" in
         ;;
     start)
         log_info "启动服务 (使用群晖配置)..."
-        docker-compose --env-file .env.synology up -d
+        docker-compose up -d
         log_success "服务已启动! 访问: http://localhost:5555"
         ;;
     stop)
         log_info "停止服务..."
-        docker-compose --env-file .env.synology down
+        docker-compose down
         log_success "服务已停止"
         ;;
     logs)
-        docker-compose --env-file .env.synology logs -f
+        docker-compose logs -f
         ;;
     update)
         log_info "更新服务..."
-        docker-compose --env-file .env.synology pull
-        docker-compose --env-file .env.synology up -d
+        docker-compose pull
+        docker-compose up -d
         log_success "服务已更新"
         ;;
     restart)

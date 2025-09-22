@@ -59,6 +59,9 @@ download_configs() {
         exit 1
     fi
     
+    # 重命名为.env让docker-compose自动识别
+    mv .env.synology .env
+    
     if ! wget -q "$base_url/docker-deploy-synology.sh"; then
         log_error "下载 docker-deploy-synology.sh 失败"
         exit 1
