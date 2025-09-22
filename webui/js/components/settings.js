@@ -4,13 +4,23 @@
 class SettingsComponent {
     constructor() {
         this.settings = {
-            apiServer: 'http://127.0.0.1:5555',
+            apiServer: this.getDefaultAPIServer(),
             apiToken: '',
             douyinCookie: '',
             tiktokCookie: ''
         };
         this.isAuthenticated = false;
         this.accessToken = '';
+    }
+
+    /**
+     * 获取默认API服务器地址
+     */
+    getDefaultAPIServer() {
+        // 自动检测API地址：如果是通过反向代理访问，使用当前域名；否则使用localhost
+        return window.location.protocol === 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+            ? `${window.location.protocol}//${window.location.host}`
+            : 'http://127.0.0.1:5555';
     }
 
     /**
@@ -221,7 +231,7 @@ class SettingsComponent {
                         <input type="text" 
                                id="api-server" 
                                value="${this.settings.apiServer}"
-                               placeholder="http://127.0.0.1:5555" 
+                               placeholder="${this.getDefaultAPIServer()}" 
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2">
                         <p class="text-sm text-gray-600">修改后需要更新页面</p>
                     </div>
