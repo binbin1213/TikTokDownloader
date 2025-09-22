@@ -63,9 +63,8 @@ jobs:
           
           # 生成标签
           if [ "${{ inputs.is_beta }}" == "true" ]; then
-            # 开发版：使用时间戳确保唯一性
-            TIMESTAMP=$(date +%Y%m%d%H%M%S)
-            TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BASE_VERSION}-dev-${TIMESTAMP},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev"
+            # 开发版：简洁的标签
+            TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:beta"
           else
             # 正式版
             TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${BASE_VERSION},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
@@ -78,7 +77,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64
           push: true
           tags: ${{ env.TAGS }}
           cache-from: type=gha

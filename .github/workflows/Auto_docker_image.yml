@@ -1,8 +1,15 @@
 name: 自动构建并发布 Docker 镜像
 
 on:
-  release:
-    types: [ published ]
+  push:
+    branches: [ master, main ]
+    paths:
+      - 'src/**'
+      - 'webui/**'
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - 'start_server.py'
 
 permissions:
   contents: read
@@ -15,7 +22,7 @@ env:
   IMAGE_NAME: binbin1213/tiktokdownloader
 
 jobs:
-  publish-docker:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,19 +44,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 提取镜像元数据
+      - name: 生成镜像标签
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=dev,enable={{is_default_branch}}
+            type=ref,event=branch,enable={{!is_default_branch}}
 
-      - name: 构建和推送 Docker 镜像到 GitHub Container Registry
+      - name: 构建和推送 Docker 镜像
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -61,3 +66,12 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
+
+      - name: 输出镜像信息
+        run: |
+          echo "🎉 Docker镜像构建成功！"
+          echo "📦 镜像标签："
+          echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | sed 's/^/  - /'
+          echo ""
+          echo "🚀 拉取命令："
+          echo "  docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
