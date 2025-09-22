@@ -39,9 +39,13 @@ setup_synology_directories() {
     sudo mkdir -p "$base_path/Volume/Cache"
     sudo mkdir -p "$base_path/config"
     
-    # 设置权限
+    # 设置权限 - 确保appuser(1000:1000)可以读写
     sudo chown -R 1000:1000 "$base_path"
     sudo chmod -R 755 "$base_path"
+    
+    # 特别确保Volume目录可写（数据库文件位置）
+    sudo chmod -R 777 "$base_path/Volume"
+    sudo chmod -R 777 "$base_path/config"
     
     log_success "群晖目录创建完成: $base_path"
 }
@@ -154,6 +158,14 @@ case "${1:-help}" in
         ;;
     start)
         log_info "启动服务 (使用群晖配置)..."
+        
+        # 检查并修复权限（防止数据库权限问题）
+        local base_path="$(pwd)"
+        log_info "检查目录权限..."
+        sudo chown -R 1000:1000 "$base_path"
+        sudo chmod -R 777 "$base_path/Volume" 2>/dev/null || true
+        sudo chmod -R 777 "$base_path/config" 2>/dev/null || true
+        
         if check_container_status; then
             docker-compose up -d
             log_success "服务已启动! 访问: http://localhost:5555"
