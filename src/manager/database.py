@@ -20,6 +20,27 @@ class Database:
         self.cursor = None
 
     async def __connect_database(self):
+        # 确保数据库文件的父目录存在
+        try:
+            self.file.parent.mkdir(parents=True, exist_ok=True)
+            
+            # 检查目录权限
+            if not self.file.parent.exists():
+                raise OSError(f"无法创建数据库目录: {self.file.parent}")
+            
+            # 如果数据库文件不存在，检查是否可以在目录中创建文件
+            if not self.file.exists():
+                test_file = self.file.parent / ".write_test"
+                try:
+                    test_file.touch()
+                    test_file.unlink()
+                except (OSError, PermissionError) as e:
+                    raise OSError(f"数据库目录没有写权限: {self.file.parent}, 错误: {e}")
+            
+        except (OSError, PermissionError) as e:
+            raise OSError(f"数据库初始化失败: {e}")
+        
+        # 尝试创建数据库连接
         self.database = await connect(self.file)
         self.database.row_factory = Row
         self.cursor = await self.database.cursor()
