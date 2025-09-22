@@ -46,6 +46,7 @@ COPY locale /app/locale
 COPY static /app/static
 COPY license /app/license
 COPY main.py /app/main.py
+COPY start_server.py /app/start_server.py
 
 # 创建应用用户（安全最佳实践）
 RUN groupadd -r appuser && useradd -r -g appuser appuser
@@ -55,6 +56,7 @@ RUN mkdir -p /app/Volume/Download \
              /app/Volume/Data \
              /app/Volume/Cache \
              /app/config && \
+    chmod +x /app/start_server.py && \
     chown -R appuser:appuser /app/Volume /app/config
 
 # 暴露端口
@@ -74,10 +76,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 ENV PYTHONPATH=/app \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
-
-# 复制启动脚本
-COPY start_server.py /app/start_server.py
-RUN chmod +x /app/start_server.py
 
 # 设置容器启动命令 - 直接启动Web API模式
 CMD ["python", "/app/start_server.py"]
