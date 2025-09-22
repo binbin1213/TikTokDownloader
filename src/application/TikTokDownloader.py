@@ -145,6 +145,7 @@ class TikTokDownloader:
     async def server(self):
         try:
             # 初始化parameter（服务器模式需要）
+            self.check_config()  # 必须先调用check_config来初始化logger
             await self.check_settings(False)
             
             self.console.print(
