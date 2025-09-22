@@ -2,10 +2,11 @@ version: '3.8'
 
 services:
   tiktok-downloader:
+    # 镜像版本选择:
+    # - latest: 最新稳定版
+    # - dev: 开发版本
+    # - master: 主分支版本
     image: ghcr.io/binbin1213/tiktokdownloader:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
     container_name: tiktok-downloader
     restart: unless-stopped
     
@@ -46,8 +47,8 @@ services:
         max-size: "10m"
         max-file: "3"
     
-    # 安全配置
-    user: "1000:1000"
+    # 安全配置 - 使用镜像中的appuser
+    # user: "1000:1000"  # 注释掉，使用镜像默认用户appuser
     read_only: false
     security_opt:
       - no-new-privileges:true
