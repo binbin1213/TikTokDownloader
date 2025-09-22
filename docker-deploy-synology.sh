@@ -85,6 +85,50 @@ CONFIG_EOF
     fi
 }
 
+# 检查容器状态
+check_container_status() {
+    local container_name="tiktok-downloader"
+    
+    if docker ps --format "table {{.Names}}" | grep -q "^${container_name}$"; then
+        log_warning "检测到容器 '$container_name' 正在运行"
+        echo "请选择操作:"
+        echo "  1) 停止并重新启动 (推荐用于更新)"
+        echo "  2) 强制重新创建 (用于配置变更)"
+        echo "  3) 取消操作"
+        echo -n "请输入选择 [1-3]: "
+        read -r choice
+        
+        case $choice in
+            1)
+                log_info "停止现有容器并重新启动..."
+                docker-compose down
+                return 0
+                ;;
+            2)
+                log_info "强制重新创建容器..."
+                docker-compose down --volumes
+                docker-compose pull
+                return 0
+                ;;
+            3)
+                log_info "操作已取消"
+                return 1
+                ;;
+            *)
+                log_error "无效选择，操作已取消"
+                return 1
+                ;;
+        esac
+    elif docker ps -a --format "table {{.Names}}" | grep -q "^${container_name}$"; then
+        log_info "检测到已停止的容器，将重新启动..."
+        docker-compose down 2>/dev/null || true
+        return 0
+    else
+        log_info "未检测到现有容器，将创建新容器..."
+        return 0
+    fi
+}
+
 # 显示使用说明
 show_usage() {
     echo "群晖 NAS 部署脚本"
@@ -95,6 +139,7 @@ show_usage() {
     echo "  3. 停止服务: $0 stop"
     echo "  4. 查看日志: $0 logs"
     echo "  5. 更新服务: $0 update"
+    echo "  6. 重新部署: $0 redeploy"
     echo
     echo "注意: setup 命令需要 sudo 权限来创建目录"
 }
@@ -109,8 +154,12 @@ case "${1:-help}" in
         ;;
     start)
         log_info "启动服务 (使用群晖配置)..."
-        docker-compose up -d
-        log_success "服务已启动! 访问: http://localhost:5555"
+        if check_container_status; then
+            docker-compose up -d
+            log_success "服务已启动! 访问: http://localhost:5555"
+        else
+            log_warning "启动操作已取消"
+        fi
         ;;
     stop)
         log_info "停止服务..."
@@ -130,6 +179,20 @@ case "${1:-help}" in
         $0 stop
         sleep 2
         $0 start
+        ;;
+    redeploy)
+        log_info "重新部署服务（强制重新创建）..."
+        log_warning "这将停止容器并拉取最新镜像"
+        echo -n "确定继续吗? [y/N]: "
+        read -r confirm
+        if [[ "$confirm" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+            docker-compose down --volumes
+            docker-compose pull
+            docker-compose up -d
+            log_success "重新部署完成! 访问: http://localhost:5555"
+        else
+            log_info "重新部署已取消"
+        fi
         ;;
     *)
         show_usage
