@@ -48,13 +48,17 @@ download_configs() {
     
     log_info "下载配置文件..."
     
-    # 下载必需文件
-    if ! wget -q "$base_url/docker-compose.yml"; then
+    # 清理可能存在的旧文件
+    rm -f docker-compose.yml.* .env.synology.* docker-deploy-synology.sh.*
+    rm -f .env.* 2>/dev/null || true
+    
+    # 下载必需文件（强制覆盖已存在的文件）
+    if ! wget -q -O docker-compose.yml "$base_url/docker-compose.yml"; then
         log_error "下载 docker-compose.yml 失败"
         exit 1
     fi
     
-    if ! wget -q "$base_url/.env.synology"; then
+    if ! wget -q -O .env.synology "$base_url/.env.synology"; then
         log_error "下载 .env.synology 失败"
         exit 1
     fi
@@ -62,7 +66,7 @@ download_configs() {
     # 重命名为.env让docker-compose自动识别
     mv .env.synology .env
     
-    if ! wget -q "$base_url/docker-deploy-synology.sh"; then
+    if ! wget -q -O docker-deploy-synology.sh "$base_url/docker-deploy-synology.sh"; then
         log_error "下载 docker-deploy-synology.sh 失败"
         exit 1
     fi
