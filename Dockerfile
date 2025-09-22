@@ -75,5 +75,9 @@ ENV PYTHONPATH=/app \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
+# 复制启动脚本
+COPY start_server.py /app/start_server.py
+RUN chmod +x /app/start_server.py
+
 # 设置容器启动命令 - 直接启动Web API模式
-CMD ["python", "-c", "import asyncio; from src.application import TikTokDownloader; async def main(): async with TikTokDownloader() as app: await app.server(); asyncio.run(main())"]
+CMD ["python", "/app/start_server.py"]
