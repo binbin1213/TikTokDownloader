@@ -37,7 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # 从构建器阶段，将已经安装好的依赖包复制到最终镜像的系统路径中
-COPY --FROM=builder /install /usr/local
+COPY --from=builder /install /usr/local
 
 # 复制应用程序代码和相关文件
 COPY src /app/src
