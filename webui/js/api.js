@@ -82,7 +82,7 @@ class API {
             source: 'false'
         });
 
-        return await this.postForm(`/detail/${platform}`, data);
+        return await this.postForm(`/${platform}/detail`, data);
     }
 
     /**
@@ -96,7 +96,7 @@ class API {
             source: 'false'
         });
 
-        return await this.postForm(`/account/${platform}`, data);
+        return await this.postForm(`/${platform}/account`, data);
     }
 
     /**
@@ -111,7 +111,7 @@ class API {
             source: 'false'
         });
 
-        return await this.postForm(`/live/${platform}`, data);
+        return await this.postForm(`/${platform}/live`, data);
     }
 
     /**
@@ -125,7 +125,7 @@ class API {
             source: 'false'
         });
 
-        return await this.postForm(`/search/${platform}`, data);
+        return await this.postForm(`/${platform}/search/general`, data);
     }
 
     /**
