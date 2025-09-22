@@ -79,7 +79,7 @@ class API {
             detail_id: workId,
             cookie: cookie,
             proxy: proxy,
-            source: 'false'
+            source: false
         });
 
         return await this.postForm(`/${platform}/detail`, data);
@@ -93,7 +93,7 @@ class API {
             sec_uid: accountId,
             cookie: cookie,
             proxy: proxy,
-            source: 'false'
+            source: false
         });
 
         return await this.postForm(`/${platform}/account`, data);
@@ -108,7 +108,7 @@ class API {
             [paramName]: liveId,
             cookie: cookie,
             proxy: proxy,
-            source: 'false'
+            source: false
         });
 
         return await this.postForm(`/${platform}/live`, data);
@@ -122,7 +122,7 @@ class API {
             keyword: keyword,
             cookie: cookie,
             proxy: proxy,
-            source: 'false'
+            source: false
         });
 
         return await this.postForm(`/${platform}/search/general`, data);
