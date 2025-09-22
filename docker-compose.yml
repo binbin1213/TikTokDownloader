@@ -53,15 +53,15 @@ services:
     security_opt:
       - no-new-privileges:true
     
-    # 资源限制（可选）
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
+    # 资源限制（可选，群晖不支持CPU限制）
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2.0'
+    #       memory: 2G
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 512M
 
 # 网络配置（可选）
 networks:
