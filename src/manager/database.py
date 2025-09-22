@@ -68,6 +68,19 @@ class Database:
         NAME TEXT PRIMARY KEY,
         VALUE TEXT NOT NULL
         );""")
+        await self.database.execute("""CREATE TABLE IF NOT EXISTS download_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        author TEXT NOT NULL,
+        platform TEXT NOT NULL,
+        download_urls TEXT NOT NULL,
+        download_type TEXT DEFAULT 'single',
+        work_id TEXT,
+        thumbnail_url TEXT,
+        duration INTEGER,
+        tags TEXT,
+        download_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );""")
 
     async def __write_default_config(self):
         await self.database.execute("""INSERT OR IGNORE INTO config_data (NAME, VALUE)
