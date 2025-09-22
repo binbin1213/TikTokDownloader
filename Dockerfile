@@ -75,5 +75,5 @@ ENV PYTHONPATH=/app \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-# 设置容器启动命令 - 默认启动Web API模式
-CMD ["python", "-c", "import sys; sys.stdout.write('7\\n'); sys.stdout.flush(); exec(open('/app/main.py').read())"]
+# 设置容器启动命令 - 直接启动Web API模式
+CMD ["python", "-c", "import asyncio; from src.application import TikTokDownloader; async def main(): async with TikTokDownloader() as app: await app.server(); asyncio.run(main())"]
