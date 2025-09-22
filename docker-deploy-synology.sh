@@ -25,12 +25,12 @@ log_warning() {
 
 # 检查并创建群晖目录
 setup_synology_directories() {
-    local base_path="/volume1/docker/douyin"
+    # 使用当前工作目录作为数据根目录
+    local base_path="$(pwd)"
     
-    log_info "创建群晖NAS目录结构..."
+    log_info "创建群晖NAS目录结构: $base_path"
     
     # 创建主目录
-    sudo mkdir -p "$base_path"
     sudo mkdir -p "$base_path/Volume/Download/douyin/live_records"
     sudo mkdir -p "$base_path/Volume/Download/douyin/audio"
     sudo mkdir -p "$base_path/Volume/Download/douyin/videos"
@@ -48,7 +48,7 @@ setup_synology_directories() {
 
 # 生成默认配置
 create_default_config() {
-    local config_path="/volume1/docker/douyin/config/settings.json"
+    local config_path="$(pwd)/config/settings.json"
     
     if [ ! -f "$config_path" ]; then
         log_info "创建默认配置文件..."
