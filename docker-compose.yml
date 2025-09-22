@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   tiktok-downloader:
-    image: ghcr.io/joeanamier/tiktok-downloader:latest
+    image: ghcr.io/binbin1213/tiktokdownloader:latest
     build:
       context: .
       dockerfile: Dockerfile
