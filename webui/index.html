@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DouK-Downloader V5.8 Beta</title>
+    
+    <!-- 本地样式文件 -->
+    <link rel="stylesheet" href="/webui/css/main.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/webui/css/font-awesome.min.css">
+    
+    <!-- 网站图标 -->
+    <link rel="icon" type="image/svg+xml" href="/webui/favicon.svg">
+    
+    <style>
+        /* 加载动画 */
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .loading-spinner::after {
+            content: '';
+            width: 2rem;
+            height: 2rem;
+            border: 2px solid #f3f4f6;
+            border-top: 2px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 错误状态 */
+        .error-container {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .error-container h2 {
+            color: var(--danger-color);
+            margin-bottom: 1rem;
+        }
+        
+        /* 加载容器 */
+        .loading-container {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-600);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container-top">
+        <!-- 顶部导航栏 -->
+        <header class="top-navbar">
+            <div class="navbar-brand">
+                <h1 class="text-white text-xl font-bold">
+                    <i class="fas fa-download mr-2"></i>
+                    DouK-Downloader
+                </h1>
+                <p class="text-white text-sm opacity-75">V5.8 Beta</p>
+            </div>
+            
+            <nav class="navbar-nav">
+                <a href="#download" class="nav-item active" data-route="download">
+                    <i class="fas fa-download"></i>
+                    <span class="nav-text">单个作品下载</span>
+                </a>
+                <a href="#account" class="nav-item" data-route="account">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-text">账号作品下载</span>
+                </a>
+                <a href="#live" class="nav-item" data-route="live">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span class="nav-text">直播下载</span>
+                </a>
+                <a href="#search" class="nav-item" data-route="search">
+                    <i class="fas fa-search"></i>
+                    <span class="nav-text">搜索功能</span>
+                </a>
+                <a href="#fileManager" class="nav-item" data-route="fileManager">
+                    <i class="fas fa-folder"></i>
+                    <span class="nav-text">文件管理</span>
+                </a>
+                <a href="#settings" class="nav-item" data-route="settings">
+                    <i class="fas fa-cog"></i>
+                    <span class="nav-text">设置</span>
+                </a>
+            </nav>
+            
+            <!-- 状态指示器 -->
+            <div class="navbar-status">
+                <div id="api-status" class="text-white text-sm opacity-75">
+                    <i class="fas fa-circle text-green-400 mr-2"></i>
+                    <span class="status-text">API 连接正常</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content-top">
+            <div id="main-content">
+                <!-- 内容将通过路由动态加载 -->
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>加载中...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript 文件 -->
+    <script src="/webui/js/api.js"></script>
+    <script src="/webui/js/router.js"></script>
+    <script src="/webui/js/components/download.js"></script>
+    <script src="/webui/js/components/account.js"></script>
+    <script src="/webui/js/components/live.js"></script>
+    <script src="/webui/js/components/search.js"></script>
+    <script src="/webui/js/components/fileManager.js"></script>
+    <script src="/webui/js/components/settings.js"></script>
+    
+    <script>
+        // 应用初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 DouK-Downloader 启动中...');
+            
+            // 检查API状态
+            await checkApiStatus();
+            
+            // 绑定导航事件
+            bindNavigation();
+            
+            // 初始化路由
+            if (window.router) {
+                console.log('✅ 路由系统已初始化');
+            }
+            
+            console.log('✅ 应用初始化完成');
+        });
+        
+        /**
+         * 检查API连接状态
+         */
+        async function checkApiStatus() {
+            const statusElement = document.getElementById('api-status');
+            
+            try {
+                const isOnline = await api.checkStatus();
+                
+                if (isOnline) {
+                    statusElement.innerHTML = `
+                        <i class="fas fa-circle text-green-400 mr-2"></i>
+                        API 连接正常
+                    `;
+                } else {
+                    throw new Error('API连接失败');
+                }
+            } catch (error) {
+                statusElement.innerHTML = `
+                    <i class="fas fa-circle text-red-400 mr-2"></i>
+                    API 连接异常
+                `;
+                console.warn('API状态检查失败:', error);
+            }
+        }
+        
+        /**
+         * 绑定导航事件
+         */
+        function bindNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const route = item.getAttribute('data-route');
+                    if (route && window.router) {
+                        router.navigate(route);
+                    }
+                });
+            });
+        }
+        
+        /**
+         * 全局错误处理
+         */
+        window.addEventListener('error', function(e) {
+            console.error('全局错误:', e.error);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('未处理的Promise拒绝:', e.reason);
+        });
+        
+        // 定期检查API状态
+        setInterval(checkApiStatus, 30000); // 每30秒检查一次
+    </script>
+</body>
+</html>

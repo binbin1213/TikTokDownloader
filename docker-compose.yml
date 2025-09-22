@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  tiktok-downloader:
+    image: ghcr.io/joeanamier/tiktok-downloader:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tiktok-downloader
+    restart: unless-stopped
+    
+    # 端口映射
+    ports:
+      - "5555:5555"
+    
+    # 数据卷挂载 - 持久化数据
+    volumes:
+      # 主数据目录：下载文件、数据库、缓存等
+      - ./data/Volume:/app/Volume
+      # 配置目录：cookies、设置等
+      - ./data/config:/app/config
+    
+    # 环境变量配置
+    environment:
+      # Python环境
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      
+      # 应用配置
+      - TZ=Asia/Shanghai
+      - LANG=zh_CN.UTF-8
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5555/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # 安全配置
+    user: "1000:1000"
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+    
+    # 资源限制（可选）
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+# 网络配置（可选）
+networks:
+  default:
+    name: tiktok-downloader-network
