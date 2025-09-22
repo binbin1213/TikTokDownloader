@@ -10,6 +10,7 @@ on:
       - 'requirements.txt'
       - 'pyproject.toml'
       - 'start_server.py'
+      - '.github/workflows/Auto_docker_image.yml'
 
 permissions:
   contents: read
