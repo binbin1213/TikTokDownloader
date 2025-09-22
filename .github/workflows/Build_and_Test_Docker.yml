@@ -44,21 +44,41 @@ jobs:
       - name: 测试镜像启动
         run: |
           # 启动容器
+          echo "🚀 启动Docker容器..."
           docker run -d --name test-container \
             -p 5555:5555 \
             -e PYTHONUNBUFFERED=1 \
             tiktok-downloader:test
           
+          # 检查容器状态
+          echo "📊 检查容器状态..."
+          docker ps -a --filter name=test-container
+          
           # 等待服务启动
+          echo "⏱️ 等待服务启动（30秒）..."
           sleep 30
           
+          # 再次检查容器状态
+          echo "📊 服务启动后容器状态..."
+          docker ps -a --filter name=test-container
+          
+          # 检查容器是否还在运行
+          if ! docker ps --filter name=test-container --filter status=running | grep -q test-container; then
+            echo "❌ 容器已停止运行，查看日志："
+            docker logs test-container
+            exit 1
+          fi
+          
           # 测试健康检查
+          echo "🏥 测试健康检查端点..."
           docker exec test-container curl -f http://localhost:5555/health || exit 1
           
           # 测试Web UI
+          echo "🌐 测试Web UI..."
           curl -f http://localhost:5555/ || exit 1
           
           # 测试API文档
+          echo "📚 测试API文档..."
           curl -f http://localhost:5555/docs || exit 1
           
           echo "✅ Docker镜像测试通过"
