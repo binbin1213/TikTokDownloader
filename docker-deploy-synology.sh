@@ -160,7 +160,7 @@ case "${1:-help}" in
         log_info "启动服务 (使用群晖配置)..."
         
         # 检查并修复权限（防止数据库权限问题）
-        local base_path="$(pwd)"
+        base_path="$(pwd)"
         log_info "检查目录权限..."
         sudo chown -R 1000:1000 "$base_path"
         sudo chmod -R 777 "$base_path/Volume" 2>/dev/null || true
