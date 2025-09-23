@@ -72,62 +72,23 @@ body {
 
 .navbar-brand {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius-lg);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.navbar-brand::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.navbar-brand:hover::before {
-    left: 100%;
-}
-
-.navbar-brand:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 0.4);
+    align-items: center;
 }
 
 .navbar-brand h1 {
-    margin-bottom: 0.25rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
 .navbar-brand h1 i {
-    background: linear-gradient(45deg, #ffd700, #ffed4e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
-}
-
-.navbar-brand p {
-    font-weight: 500;
-    background: linear-gradient(45deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 1.75rem;
+    color: #FF6B6B;
+    filter: drop-shadow(0 2px 4px rgba(255, 107, 107, 0.3));
 }
 
 .navbar-nav {
@@ -140,36 +101,6 @@ body {
 .navbar-status {
     display: flex;
     align-items: center;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--border-radius-lg);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.navbar-status::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transition: left 0.6s;
-}
-
-.navbar-status:hover::before {
-    left: 100%;
-}
-
-.navbar-status:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 25px rgba(16, 185, 129, 0.2);
-    border-color: rgba(16, 185, 129, 0.4);
 }
 
 .navbar-status #api-status {
@@ -177,30 +108,29 @@ body {
     align-items: center;
     gap: 0.5rem;
     font-weight: 500;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .navbar-status .fas.fa-circle {
     font-size: 0.75rem;
-    animation: pulse 2s infinite;
+    transition: color 0.3s ease;
 }
 
-@keyframes pulse {
-    0% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.7;
-        transform: scale(1.1);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
+/* 连接正常状态 */
+.navbar-status .fas.fa-circle.status-success {
+    color: #4CAF50;
+    filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.6));
+}
+
+/* 连接异常状态 */
+.navbar-status .fas.fa-circle.status-error {
+    color: #F44336;
+    filter: drop-shadow(0 0 4px rgba(244, 67, 54, 0.6));
 }
 
 .navbar-status .status-text {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .main-content-top {
@@ -214,7 +144,7 @@ body {
 
 .main-content-top > * {
     width: 100%;
-    max-width: 700px;
+    max-width: 500px;
     margin: 0 auto;
 }
 
@@ -317,11 +247,14 @@ body {
     .navbar-brand {
         align-items: center;
         margin-bottom: 0;
-        padding: 0.75rem 1rem;
     }
     
     .navbar-brand h1 {
         font-size: 1.25rem;
+    }
+    
+    .main-content-top > * {
+        max-width: 90%;
     }
     
     .navbar-nav {

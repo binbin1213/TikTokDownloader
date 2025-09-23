@@ -63,10 +63,9 @@
         <header class="top-navbar">
             <div class="navbar-brand">
                 <h1 class="text-white text-xl font-bold">
-                    <i class="fas fa-download mr-2"></i>
-                    DouK-Downloader
+                    <i class="fas fa-video mr-2"></i>
+                    VideoHub
                 </h1>
-                <p class="text-white text-sm opacity-75">V5.8 Beta</p>
             </div>
             
             <nav class="navbar-nav">
@@ -98,9 +97,9 @@
             
             <!-- 状态指示器 -->
             <div class="navbar-status">
-                <div id="api-status" class="text-white text-sm opacity-75">
-                    <i class="fas fa-circle text-green-400 mr-2"></i>
-                    <span class="status-text">API 连接正常</span>
+                <div id="api-status" class="text-white text-sm">
+                    <i class="fas fa-circle status-success" id="status-indicator"></i>
+                    <span class="status-text" id="status-text">API 连接正常</span>
                 </div>
             </div>
         </header>
@@ -150,24 +149,21 @@
          * 检查API连接状态
          */
         async function checkApiStatus() {
-            const statusElement = document.getElementById('api-status');
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('status-text');
             
             try {
                 const isOnline = await api.checkStatus();
                 
                 if (isOnline) {
-                    statusElement.innerHTML = `
-                        <i class="fas fa-circle text-green-400 mr-2"></i>
-                        API 连接正常
-                    `;
+                    statusIndicator.className = 'fas fa-circle status-success';
+                    statusText.textContent = 'API 连接正常';
                 } else {
                     throw new Error('API连接失败');
                 }
             } catch (error) {
-                statusElement.innerHTML = `
-                    <i class="fas fa-circle text-red-400 mr-2"></i>
-                    API 连接异常
-                `;
+                statusIndicator.className = 'fas fa-circle status-error';
+                statusText.textContent = 'API 连接异常';
                 console.warn('API状态检查失败:', error);
             }
         }
