@@ -254,12 +254,19 @@ class DownloadComponent {
      */
     async getGlobalCookie(platform) {
         try {
+            console.log('🍪 尝试获取全局Cookie for platform:', platform);
             const settings = await api.getCookieSettings();
+            console.log('🍪 Cookie设置响应:', settings);
+            
             if (settings.success) {
-                return platform === 'douyin' ? settings.douyin_cookie : settings.tiktok_cookie;
+                const cookie = platform === 'douyin' ? settings.douyin_cookie : settings.tiktok_cookie;
+                console.log('🍪 获取到的Cookie长度:', cookie ? cookie.length : 0);
+                return cookie || '';
+            } else {
+                console.warn('🍪 Cookie设置响应不成功:', settings);
             }
         } catch (error) {
-            console.warn('获取全局Cookie失败:', error);
+            console.error('🍪 获取全局Cookie失败:', error);
         }
         return '';
     }
