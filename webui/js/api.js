@@ -75,28 +75,28 @@ class API {
      * 获取单个作品信息
      */
     async getWorkDetail(platform, workId, cookie = '', proxy = '') {
-        const data = new URLSearchParams({
+        const data = {
             detail_id: workId,
             cookie: cookie,
             proxy: proxy,
             source: false
-        });
+        };
 
-        return await this.postForm(`/${platform}/detail`, data);
+        return await this.postJSON(`/${platform}/detail`, data);
     }
 
     /**
      * 获取账号作品
      */
     async getAccountWorks(platform, accountId, cookie = '', proxy = '') {
-        const data = new URLSearchParams({
+        const data = {
             sec_uid: accountId,
             cookie: cookie,
             proxy: proxy,
             source: false
-        });
+        };
 
-        return await this.postForm(`/${platform}/account`, data);
+        return await this.postJSON(`/${platform}/account`, data);
     }
 
     /**
@@ -104,28 +104,28 @@ class API {
      */
     async getLiveInfo(platform, liveId, cookie = '', proxy = '') {
         const paramName = platform === 'douyin' ? 'web_rid' : 'room_id';
-        const data = new URLSearchParams({
+        const data = {
             [paramName]: liveId,
             cookie: cookie,
             proxy: proxy,
             source: false
-        });
+        };
 
-        return await this.postForm(`/${platform}/live`, data);
+        return await this.postJSON(`/${platform}/live`, data);
     }
 
     /**
      * 搜索作品
      */
     async searchWorks(platform, keyword, cookie = '', proxy = '') {
-        const data = new URLSearchParams({
+        const data = {
             keyword: keyword,
             cookie: cookie,
             proxy: proxy,
             source: false
-        });
+        };
 
-        return await this.postForm(`/${platform}/search/general`, data);
+        return await this.postJSON(`/${platform}/search/general`, data);
     }
 
     /**
