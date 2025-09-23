@@ -1047,12 +1047,26 @@ class TikTok:
         proxy: str,
         detail_id: str,
     ):
-        return await processor(
-            self.parameter,
-            cookie,
-            proxy,
-            detail_id,
-        ).run()
+        try:
+            self.logger.info(f"🔍 开始获取作品详情: {detail_id}")
+            self.logger.info(f"📋 Cookie状态: {'有效' if cookie else '无'} (长度: {len(cookie) if cookie else 0})")
+            
+            result = await processor(
+                self.parameter,
+                cookie,
+                proxy,
+                detail_id,
+            ).run()
+            
+            if result:
+                self.logger.info(f"✅ 作品详情获取成功: {detail_id}")
+            else:
+                self.logger.warning(f"❌ 作品详情获取失败: {detail_id} - 返回数据为空")
+                
+            return result
+        except Exception as e:
+            self.logger.error(f"💥 作品详情获取异常: {detail_id} - {str(e)}")
+            return None
 
     async def __handle_detail(
         self,
@@ -1065,6 +1079,9 @@ class TikTok:
         cookie: str = None,
         proxy: str = None,
     ):
+        self.logger.info(f"🚀 开始批量处理作品: {len(ids)}个")
+        self.logger.info(f"📝 作品ID列表: {ids}")
+        
         detail_data = [
             await self.handle_detail_single(
                 processor,
@@ -1074,7 +1091,12 @@ class TikTok:
             )
             for i in ids
         ]
+        
+        valid_data = [d for d in detail_data if d]
+        self.logger.info(f"📊 处理结果: {len(valid_data)}/{len(detail_data)} 个作品获取成功")
+        
         if not any(detail_data):
+            self.logger.warning("❌ 所有作品详情获取失败，返回None")
             return None
         if source:
             return detail_data
