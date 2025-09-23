@@ -985,3 +985,4 @@ class FileManagerComponent {
 // 创建全局文件管理组件实例
 window.FileManagerComponent = FileManagerComponent;
 window.fileManagerComponent = new FileManagerComponent();
+window.fileManager = window.fileManagerComponent; // 添加别名以兼容HTML中的引用
