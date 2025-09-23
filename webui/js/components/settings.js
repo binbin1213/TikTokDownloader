@@ -104,52 +104,53 @@ class SettingsComponent {
      */
     showPasswordVerification() {
         const content = `
-            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div class="password-auth-container bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div class="password-auth-container bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
                     <!-- 顶部装饰 -->
-                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-center">
-                        <div class="bg-white bg-opacity-20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                            <i class="fas fa-shield-alt text-2xl text-white"></i>
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-8 text-center">
+                        <div class="bg-white bg-opacity-20 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-3xl text-white"></i>
                         </div>
-                        <h2 class="text-xl font-bold text-white mb-2">安全验证</h2>
-                        <p class="text-white text-opacity-90 text-sm">请输入访问密码以继续</p>
+                        <h2 class="text-2xl font-bold text-white mb-3">安全验证</h2>
+                        <p class="text-white text-opacity-90 text-base leading-relaxed">请输入访问密码以继续</p>
                     </div>
                     
                     <!-- 表单内容 -->
-                    <div class="p-6">
+                    <div class="p-8">
                         <div class="auth-form">
-                            <div class="mb-6">
+                            <div class="mb-8">
+                                <label class="block text-sm font-medium text-gray-700 mb-3">访问密码</label>
                                 <div class="relative">
                                     <input type="password" 
                                            id="access-password" 
                                            placeholder="请输入访问密码" 
-                                           class="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                                    <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                           class="w-full pl-14 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all text-base">
+                                    <i class="fas fa-lock absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
                                 </div>
                             </div>
                             
-                            <div class="space-y-3">
+                            <div class="space-y-4">
                                 <button id="verify-password-btn" 
-                                        class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
-                                    <i class="fas fa-unlock-alt mr-2"></i>
+                                        class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg text-base">
+                                    <i class="fas fa-unlock-alt mr-3"></i>
                                     验证密码
                                 </button>
                                 
                                 <button id="forgot-password-btn" 
-                                        class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors">
-                                    <i class="fas fa-question-circle mr-2"></i>
+                                        class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors text-base">
+                                    <i class="fas fa-question-circle mr-3"></i>
                                     忘记密码？
                                 </button>
                             </div>
                         </div>
                         
-                        <div id="auth-message" class="mt-4 text-center text-sm"></div>
+                        <div id="auth-message" class="mt-6 text-center text-sm"></div>
                     </div>
                     
                     <!-- 底部提示 -->
-                    <div class="bg-gray-50 px-6 py-4 text-center">
-                        <p class="text-xs text-gray-500">
-                            <i class="fas fa-info-circle mr-1"></i>
+                    <div class="bg-gray-50 px-8 py-5 text-center">
+                        <p class="text-sm text-gray-500 leading-relaxed">
+                            <i class="fas fa-info-circle mr-2"></i>
                             此密码用于保护Cookie等敏感配置信息
                         </p>
                     </div>
@@ -166,56 +167,58 @@ class SettingsComponent {
      */
     showPasswordSetup() {
         const content = `
-            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div class="password-auth-container bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div class="password-auth-container bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
                     <!-- 顶部装饰 -->
-                    <div class="bg-gradient-to-r from-green-500 to-blue-500 p-6 text-center">
-                        <div class="bg-white bg-opacity-20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                            <i class="fas fa-shield-alt text-2xl text-white"></i>
+                    <div class="bg-gradient-to-r from-green-500 to-blue-500 p-8 text-center">
+                        <div class="bg-white bg-opacity-20 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-3xl text-white"></i>
                         </div>
-                        <h2 class="text-xl font-bold text-white mb-2">设置访问密码</h2>
-                        <p class="text-white text-opacity-90 text-sm">首次使用，请设置访问密码</p>
+                        <h2 class="text-2xl font-bold text-white mb-3">设置访问密码</h2>
+                        <p class="text-white text-opacity-90 text-base leading-relaxed">首次使用，请设置访问密码</p>
                     </div>
                     
                     <!-- 表单内容 -->
-                    <div class="p-6">
+                    <div class="p-8">
                         <div class="auth-form">
-                            <div class="mb-4">
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-3">新密码</label>
                                 <div class="relative">
                                     <input type="password" 
                                            id="new-password" 
                                            placeholder="请输入新密码（建议8位以上）" 
-                                           class="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all">
-                                    <i class="fas fa-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                           class="w-full pl-14 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white transition-all text-base">
+                                    <i class="fas fa-key absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
                                 </div>
                             </div>
                             
-                            <div class="mb-6">
+                            <div class="mb-8">
+                                <label class="block text-sm font-medium text-gray-700 mb-3">确认密码</label>
                                 <div class="relative">
                                     <input type="password" 
                                            id="confirm-password" 
                                            placeholder="请再次输入密码" 
-                                           class="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all">
-                                    <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                           class="w-full pl-14 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white transition-all text-base">
+                                    <i class="fas fa-lock absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
                                 </div>
                             </div>
                             
-                            <div class="space-y-3">
+                            <div class="space-y-4">
                                 <button id="setup-password-btn" 
-                                        class="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
-                                    <i class="fas fa-shield-alt mr-2"></i>
+                                        class="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg text-base">
+                                    <i class="fas fa-shield-alt mr-3"></i>
                                     设置密码
                                 </button>
                             </div>
                         </div>
                         
-                        <div id="setup-message" class="mt-4 text-center text-sm"></div>
+                        <div id="setup-message" class="mt-6 text-center text-sm"></div>
                     </div>
                     
                     <!-- 底部提示 -->
-                    <div class="bg-gray-50 px-6 py-4 text-center">
-                        <p class="text-xs text-gray-500">
-                            <i class="fas fa-info-circle mr-1"></i>
+                    <div class="bg-gray-50 px-8 py-5 text-center">
+                        <p class="text-sm text-gray-500 leading-relaxed">
+                            <i class="fas fa-info-circle mr-2"></i>
                             请妥善保管密码，遗失后需要重置应用
                         </p>
                     </div>

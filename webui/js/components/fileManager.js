@@ -196,46 +196,44 @@ class FileManagerComponent {
                                 (typeof downloadUrls === 'string' ? JSON.parse(downloadUrls).length : 0);
 
             html += `
-                <div class="download-item card" style="padding: 1rem;">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-2">
-                                <span class="text-2xl mr-3">${platformIcon}</span>
-                                <h4 class="font-semibold text-gray-900">${record.title}</h4>
+                <div class="download-item card relative" style="padding: 1rem;">
+                    <div class="pr-20">
+                        <div class="flex items-center mb-2">
+                            <span class="text-2xl mr-3">${platformIcon}</span>
+                            <h4 class="font-semibold text-gray-900">${record.title}</h4>
+                        </div>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <div class="flex items-center">
+                                <i class="fas fa-user w-4 text-gray-400 mr-2"></i>
+                                <span>${record.author}</span>
                             </div>
-                            <div class="text-sm text-gray-600 space-y-1">
-                                <div class="flex items-center">
-                                    <i class="fas fa-user w-4 text-gray-400 mr-2"></i>
-                                    <span>${record.author}</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <i class="fas fa-clock w-4 text-gray-400 mr-2"></i>
-                                    <span>${displayTime}</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <i class="fas fa-tag w-4 text-gray-400 mr-2"></i>
-                                    <span>${this.getDownloadTypeText(downloadType)}</span>
-                                    ${record.duration ? ` • ${record.duration}` : ''}
-                                </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-clock w-4 text-gray-400 mr-2"></i>
+                                <span>${displayTime}</span>
                             </div>
-                            <div class="mt-3 flex items-center text-xs">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    <i class="fas fa-download mr-1"></i>
-                                    ${downloadCount} 个文件
-                                </span>
-                                ${record.status ? `<span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">${record.status}</span>` : ''}
+                            <div class="flex items-center">
+                                <i class="fas fa-tag w-4 text-gray-400 mr-2"></i>
+                                <span>${this.getDownloadTypeText(downloadType)}</span>
+                                ${record.duration ? ` • ${record.duration}` : ''}
                             </div>
                         </div>
-                        <div class="flex gap-2 ml-4">
-                            <button onclick="fileManager.downloadToLocal('${record.id || index}', ${index})" 
-                                    class="btn btn-success px-3 py-1 text-xs">
-                                <i class="fas fa-download mr-1"></i>下载到本地
-                            </button>
-                            <button onclick="fileManager.deleteDownload('${record.id || index}', ${index})" 
-                                    class="btn btn-danger px-3 py-1 text-xs">
-                                <i class="fas fa-trash mr-1"></i>删除
-                            </button>
+                        <div class="mt-3 flex items-center text-xs">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <i class="fas fa-download mr-1"></i>
+                                ${downloadCount} 个文件
+                            </span>
+                            ${record.status ? `<span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">${record.status}</span>` : ''}
                         </div>
+                    </div>
+                    <div class="absolute bottom-3 right-3 flex gap-1">
+                        <button onclick="fileManager.downloadToLocal('${record.id || index}', ${index})" 
+                                class="btn btn-success px-2 py-1 text-xs min-w-0" title="下载到本地">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button onclick="fileManager.deleteDownload('${record.id || index}', ${index})" 
+                                class="btn btn-danger px-2 py-1 text-xs min-w-0" title="删除记录">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
             `;
