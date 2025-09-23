@@ -954,9 +954,39 @@ body {
 
 /* 密码验证界面样式 */
 .password-auth-container {
-    background: white;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* 模态背景动画 */
+.fixed.inset-0.bg-black {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 输入框焦点效果 */
+.password-auth-container input:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* 按钮悬停效果增强 */
+.password-auth-container button:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* 修复字体和排版 */

@@ -230,6 +230,52 @@ class APIServer(TikTok):
             )
 
         @self.server.post(
+            "/extract/work_id",
+            summary=_("提取作品ID（支持短链接）"),
+            description=_(
+                dedent("""
+                从输入文本中提取作品ID，支持短链接自动解析
+                
+                **参数**:
+                - **text**: 包含作品链接或ID的文本；必需参数
+                - **type**: 提取类型，默认为 'detail'；可选参数
+                - **proxy**: 代理；可选参数
+                """)
+            ),
+            tags=[_("工具")],
+            response_model=dict,
+        )
+        async def extract_work_id(
+            extract: ShortUrl, token: str = Depends(token_dependency)
+        ):
+            try:
+                # 使用链接提取器解析作品ID
+                work_ids = await self.extract.run(extract.text, "detail", extract.proxy)
+                
+                if work_ids:
+                    return {
+                        "success": True,
+                        "message": _("提取作品ID成功！"),
+                        "work_ids": work_ids,
+                        "params": extract.model_dump(),
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": _("未找到有效的作品ID"),
+                        "work_ids": [],
+                        "params": extract.model_dump(),
+                    }
+            except Exception as e:
+                self.log.error(f"提取作品ID失败: {e}")
+                return {
+                    "success": False,
+                    "message": f"提取失败: {str(e)}",
+                    "work_ids": [],
+                    "params": extract.model_dump(),
+                }
+
+        @self.server.post(
             "/douyin/detail",
             summary=_("获取单个作品数据"),
             description=_(

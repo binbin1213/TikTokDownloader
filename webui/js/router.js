@@ -198,12 +198,18 @@ class Router {
                 
                 <div class="form-group mb-6">
                     <label class="form-label">Cookie (可选)</label>
-                    <input type="text" id="work-cookie" class="form-input" placeholder="输入Cookie以获取更多信息...">
+                    <div class="flex gap-2">
+                        <input type="text" id="work-cookie" class="form-input flex-1" placeholder="输入Cookie以获取更多信息...">
+                        <button type="button" id="show-cookie" class="btn btn-secondary px-3 py-2 text-sm" title="加载全局Cookie">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
                 </div>
                 
-                <div class="flex gap-4">
-                    <button id="get-work-info" class="btn btn-primary">获取作品信息</button>
-                    <button id="download-work" class="btn btn-success" disabled>下载作品</button>
+                <div class="flex justify-center">
+                    <button id="download-work" class="btn btn-primary px-8">
+                        <i class="fas fa-download mr-2"></i>下载作品
+                    </button>
                 </div>
                 
                 <div id="work-result" class="hidden mt-6"></div>

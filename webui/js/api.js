@@ -96,6 +96,20 @@ class API {
         }
     }
 
+    // ==================== 链接解析API ====================
+    
+    /**
+     * 提取作品ID（支持短链接解析）
+     */
+    async extractWorkId(text) {
+        const data = {
+            text: text,
+            type: 'detail'
+        };
+        
+        return await this.postJSON('/extract/work_id', data);
+    }
+    
     // ==================== 下载相关API ====================
     
     /**

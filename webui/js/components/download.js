@@ -19,13 +19,9 @@ class DownloadComponent {
      * 绑定事件
      */
     bindEvents() {
-        const getInfoBtn = document.getElementById('get-work-info');
         const downloadBtn = document.getElementById('download-work');
         const workUrlInput = document.getElementById('work-url');
-
-        if (getInfoBtn) {
-            getInfoBtn.addEventListener('click', () => this.getWorkInfo());
-        }
+        const showCookieBtn = document.getElementById('show-cookie');
 
         if (downloadBtn) {
             downloadBtn.addEventListener('click', () => this.downloadWork());
@@ -37,6 +33,10 @@ class DownloadComponent {
                 setTimeout(() => this.extractIdFromUrl(), 100);
             });
         }
+
+        if (showCookieBtn) {
+            showCookieBtn.addEventListener('click', () => this.toggleCookieDisplay());
+        }
     }
 
     /**
@@ -46,11 +46,90 @@ class DownloadComponent {
         try {
             const settings = await api.getCookieSettings();
             if (settings.success) {
-                // 不自动填充，保持用户选择
+                // 不自动填充Cookie，保护用户隐私
                 console.log('全局Cookie已加载，可在需要时使用');
+                this.globalCookieLoaded = true;
+                this.updateCookieInputPlaceholder();
             }
         } catch (error) {
             console.warn('加载全局Cookie失败:', error);
+            this.globalCookieLoaded = false;
+        }
+    }
+
+    /**
+     * 更新Cookie输入框占位符
+     */
+    updateCookieInputPlaceholder() {
+        const cookieInput = document.getElementById('work-cookie');
+        if (cookieInput && this.globalCookieLoaded) {
+            cookieInput.placeholder = '已加载全局Cookie，留空将自动使用 (点击显示按钮查看)';
+        }
+    }
+
+    /**
+     * 脱敏显示Cookie
+     */
+    maskCookie(cookie) {
+        if (!cookie || cookie.length < 20) {
+            return cookie;
+        }
+        
+        const start = cookie.substring(0, 10);
+        const end = cookie.substring(cookie.length - 10);
+        const masked = start + '*'.repeat(Math.min(20, cookie.length - 20)) + end;
+        return masked;
+    }
+
+    /**
+     * 加载Cookie到输入框（脱敏显示）
+     */
+    async toggleCookieDisplay() {
+        const cookieInput = document.getElementById('work-cookie');
+        const showCookieBtn = document.getElementById('show-cookie');
+        const icon = showCookieBtn.querySelector('i');
+        
+        if (!this.globalCookieLoaded) {
+            alert('未加载全局Cookie');
+            return;
+        }
+
+        try {
+            const settings = await api.getCookieSettings();
+            if (!settings.success) {
+                alert('获取Cookie失败');
+                return;
+            }
+
+            // 检测当前平台
+            const workUrl = document.getElementById('work-url')?.value.trim() || '';
+            const platform = this.detectPlatform(workUrl) || 'douyin';
+            const cookie = platform === 'douyin' ? settings.douyin_cookie : settings.tiktok_cookie;
+
+            if (!cookie) {
+                alert(`未设置${platform === 'douyin' ? '抖音' : 'TikTok'}的全局Cookie`);
+                return;
+            }
+
+            // 如果已经加载了脱敏Cookie，则清空
+            if (cookieInput.value === this.maskCookie(cookie)) {
+                cookieInput.value = '';
+                cookieInput.placeholder = '输入Cookie以获取更多信息...';
+                icon.className = 'fas fa-download';
+                showCookieBtn.title = '加载全局Cookie';
+            } else {
+                // 显示脱敏Cookie，但实际存储完整Cookie供内部使用
+                cookieInput.value = this.maskCookie(cookie);
+                cookieInput.placeholder = '已加载全局Cookie (脱敏显示)';
+                icon.className = 'fas fa-times';
+                showCookieBtn.title = '清除Cookie';
+                
+                // 存储完整Cookie供内部使用
+                cookieInput.dataset.fullCookie = cookie;
+            }
+        } catch (error) {
+            console.error('加载Cookie失败:', error);
+            alert('操作失败');
         }
     }
 
@@ -59,10 +138,10 @@ class DownloadComponent {
      */
     validateInput() {
         const workUrl = document.getElementById('work-url')?.value.trim();
-        const getInfoBtn = document.getElementById('get-work-info');
+        const downloadBtn = document.getElementById('download-work');
         
-        if (getInfoBtn) {
-            getInfoBtn.disabled = !workUrl;
+        if (downloadBtn) {
+            downloadBtn.disabled = !workUrl;
         }
     }
 
@@ -157,8 +236,8 @@ class DownloadComponent {
 
         this.currentPlatform = platform;
 
-        // 提取纯数字ID
-        const workId = this.extractWorkId(workUrl);
+        // 提取纯数字ID（支持短链接）
+        const workId = await this.extractWorkId(workUrl);
         if (!workId) {
             alert('无法提取作品ID，请确认输入格式正确');
             return;
@@ -243,10 +322,34 @@ class DownloadComponent {
     /**
      * 提取作品ID
      */
-    extractWorkId(input) {
-        // 匹配19位数字ID
-        const match = input.match(/(\d{19})/);
-        return match ? match[1] : null;
+    async extractWorkId(input) {
+        // 首先尝试直接匹配19位数字ID
+        const directMatch = input.match(/(\d{19})/);
+        if (directMatch) {
+            console.log('🔍 直接提取到作品ID:', directMatch[1]);
+            return directMatch[1];
+        }
+        
+        // 检查是否包含短链接
+        const shortLinkMatch = input.match(/https:\/\/v\.douyin\.com\/([A-Za-z0-9_-]+)/);
+        if (shortLinkMatch) {
+            console.log('🔗 检测到短链接:', shortLinkMatch[0]);
+            try {
+                // 发送到后端解析短链接
+                const result = await api.extractWorkId(input);
+                if (result.success && result.work_ids && result.work_ids.length > 0) {
+                    console.log('🎯 短链接解析成功，提取到ID:', result.work_ids[0]);
+                    return result.work_ids[0];
+                } else {
+                    console.warn('🔗 短链接解析失败:', result);
+                }
+            } catch (error) {
+                console.error('🔗 短链接解析出错:', error);
+            }
+        }
+        
+        console.warn('❌ 无法提取作品ID from:', input);
+        return null;
     }
 
     /**
@@ -375,17 +478,172 @@ class DownloadComponent {
     }
 
     /**
-     * 下载作品
+     * 下载作品（合并获取信息和下载逻辑）
      */
     async downloadWork() {
-        if (!this.currentWorkData || !this.currentPlatform) {
-            alert('请先获取作品信息');
+        const workUrl = document.getElementById('work-url')?.value.trim();
+        const cookie = document.getElementById('work-cookie')?.value.trim() || '';
+        const downloadBtn = document.getElementById('download-work');
+
+        if (!workUrl) {
+            alert('请输入作品链接或ID');
             return;
         }
 
-        const downloadBtn = document.getElementById('download-work');
-        
         try {
+            // 更新按钮状态
+            if (downloadBtn) {
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>获取作品信息中...';
+            }
+
+            // 第一步：获取作品信息
+            await this.getWorkInfoForDownload(workUrl, cookie);
+            
+            // 第二步：弹出下载位置选择对话框
+            const downloadChoice = await this.showDownloadLocationDialog();
+            
+            // 第三步：根据选择执行下载
+            if (downloadChoice === 'local') {
+                await this.downloadToLocal();
+            } else if (downloadChoice === 'server') {
+                await this.downloadToServer();
+            }
+            
+        } catch (error) {
+            console.error('下载失败:', error);
+            alert(`下载失败: ${error.message}`);
+        } finally {
+            // 恢复按钮状态
+            if (downloadBtn) {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i>下载作品';
+            }
+        }
+    }
+
+    /**
+     * 获取作品信息（用于下载）
+     */
+    async getWorkInfoForDownload(workUrl, cookie) {
+        // 检测平台
+        const platform = this.detectPlatform(workUrl);
+        if (!platform) {
+            throw new Error('不支持的平台或链接格式');
+        }
+
+        this.currentPlatform = platform;
+
+        // 提取作品ID（支持短链接）
+        const workId = await this.extractWorkId(workUrl);
+        if (!workId) {
+            throw new Error('无法提取作品ID，请确认输入格式正确');
+        }
+
+        // 获取最终Cookie
+        let finalCookie = this.getEffectiveCookie(cookie);
+        if (!finalCookie) {
+            finalCookie = await this.getGlobalCookie(platform);
+        }
+
+        // 调用API获取作品信息
+        const result = await api.getWorkDetail(platform, workId, finalCookie);
+
+        if (result.message === '获取数据成功！' && result.data) {
+            this.currentWorkData = result.data;
+            return result.data;
+        } else {
+            throw new Error(result.message || '获取作品信息失败');
+        }
+    }
+
+    /**
+     * 获取有效的Cookie（处理脱敏显示的情况）
+     */
+    getEffectiveCookie(inputCookie) {
+        if (!inputCookie) {
+            return '';
+        }
+
+        const cookieInput = document.getElementById('work-cookie');
+        
+        // 如果输入的是脱敏Cookie，使用存储的完整Cookie
+        if (cookieInput && cookieInput.dataset.fullCookie && inputCookie.includes('*')) {
+            return cookieInput.dataset.fullCookie;
+        }
+        
+        // 否则使用用户输入的Cookie
+        return inputCookie;
+    }
+
+    /**
+     * 显示下载位置选择对话框
+     */
+    async showDownloadLocationDialog() {
+        return new Promise((resolve) => {
+            // 创建模态对话框
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-download text-4xl text-blue-500 mb-3"></i>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">选择下载位置</h3>
+                        <p class="text-gray-600 text-sm">请选择将作品下载到哪里</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <button id="download-local" class="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center">
+                            <i class="fas fa-laptop mr-2"></i>
+                            下载到本地
+                        </button>
+                        <button id="download-server" class="w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center">
+                            <i class="fas fa-server mr-2"></i>
+                            下载到服务器
+                        </button>
+                        <button id="download-cancel" class="w-full p-2 text-gray-500 hover:text-gray-700 transition-colors">
+                            取消
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // 绑定事件
+            modal.querySelector('#download-local').addEventListener('click', () => {
+                document.body.removeChild(modal);
+                resolve('local');
+            });
+
+            modal.querySelector('#download-server').addEventListener('click', () => {
+                document.body.removeChild(modal);
+                resolve('server');
+            });
+
+            modal.querySelector('#download-cancel').addEventListener('click', () => {
+                document.body.removeChild(modal);
+                resolve(null);
+            });
+
+            // 点击背景关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                    resolve(null);
+                }
+            });
+        });
+    }
+
+    /**
+     * 下载到本地
+     */
+    async downloadToLocal() {
+        if (!this.currentWorkData) {
+            throw new Error('没有作品数据');
+        }
+        
             // 处理下载链接
             let downloadUrls = [];
             if (this.currentWorkData.downloads) {
@@ -397,16 +655,66 @@ class DownloadComponent {
             }
 
             if (downloadUrls.length === 0) {
-                alert('没有可下载的链接！');
-                return;
+            throw new Error('没有可下载的链接！');
+        }
+
+        // 浏览器下载
+        console.log('🖥️ 开始浏览器下载，链接数量:', downloadUrls.length);
+        for (let i = 0; i < downloadUrls.length; i++) {
+            const url = downloadUrls[i];
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${this.currentWorkData.desc || 'video'}_${i + 1}`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // 如果有多个文件，稍微延迟一下避免浏览器阻止
+            if (i < downloadUrls.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
+        }
+        
+        alert(`开始下载 ${downloadUrls.length} 个文件到本地！`);
+    }
 
-            // 显示下载选项
-            this.showDownloadOptions(downloadUrls);
+    /**
+     * 下载到服务器
+     */
+    async downloadToServer() {
+        if (!this.currentWorkData || !this.currentPlatform) {
+            throw new Error('没有作品数据');
+        }
 
-        } catch (error) {
-            console.error('下载失败:', error);
-            alert('下载失败: ' + error.message);
+        console.log('🖥️ 开始服务器下载');
+        
+        // 获取下载链接
+        let downloadUrls = [];
+        if (this.currentWorkData.downloads) {
+            if (typeof this.currentWorkData.downloads === 'string') {
+                downloadUrls = [this.currentWorkData.downloads];
+            } else if (Array.isArray(this.currentWorkData.downloads)) {
+                downloadUrls = this.currentWorkData.downloads;
+            }
+        }
+
+        if (downloadUrls.length === 0) {
+            throw new Error('没有可下载的链接！');
+        }
+
+        // 调用服务器下载API
+        const result = await api.downloadToServer(
+            downloadUrls[0], // 使用第一个下载链接
+            this.currentPlatform,
+            this.currentWorkData.desc || 'video',
+            this.currentWorkData.nickname || 'unknown'
+        );
+
+        if (result.success) {
+            alert('已开始下载到服务器！可在文件管理中查看下载进度。');
+        } else {
+            throw new Error(result.message || '服务器下载失败');
         }
     }
 

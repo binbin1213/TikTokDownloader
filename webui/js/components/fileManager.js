@@ -226,13 +226,13 @@ class FileManagerComponent {
                                 ${record.status ? `<span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">${record.status}</span>` : ''}
                             </div>
                         </div>
-                        <div class="flex flex-col gap-2 ml-4">
-                            <button onclick="fileManager.redownload('${record.id || index}', ${index})" 
-                                    class="btn btn-success btn-sm">
-                                <i class="fas fa-redo mr-1"></i>重新下载
+                        <div class="flex gap-2 ml-4">
+                            <button onclick="fileManager.downloadToLocal('${record.id || index}', ${index})" 
+                                    class="btn btn-success px-3 py-1 text-xs">
+                                <i class="fas fa-download mr-1"></i>下载到本地
                             </button>
                             <button onclick="fileManager.deleteDownload('${record.id || index}', ${index})" 
-                                    class="btn btn-danger btn-sm">
+                                    class="btn btn-danger px-3 py-1 text-xs">
                                 <i class="fas fa-trash mr-1"></i>删除
                             </button>
                         </div>
@@ -568,20 +568,84 @@ class FileManagerComponent {
     }
 
     /**
-     * 重新下载
+     * 下载到本地（浏览器下载）
      */
-    async redownload(recordId, index) {
-        alert(`💡 重新下载功能\n\n记录ID: ${recordId}\n\n此功能需要重新获取作品信息后下载，建议使用原始链接重新下载。`);
+    async downloadToLocal(recordId, index) {
+        try {
+            const record = this.downloadHistory[index];
+            if (!record) {
+                alert('❌ 找不到下载记录');
+                return;
+            }
+
+            const downloadUrls = record.download_urls || record.downloads || [];
+            let urls = [];
+            
+            if (Array.isArray(downloadUrls)) {
+                urls = downloadUrls;
+            } else if (typeof downloadUrls === 'string') {
+                try {
+                    urls = JSON.parse(downloadUrls);
+                } catch {
+                    urls = [downloadUrls];
+                }
+            }
+
+            if (urls.length === 0) {
+                alert('❌ 该记录没有可用的下载链接');
+                return;
+            }
+
+            // 批量下载到浏览器
+            urls.forEach((url, urlIndex) => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${record.title}_${urlIndex + 1}`;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }, urlIndex * 500); // 间隔500ms下载，避免浏览器阻止
+            });
+
+            alert(`✅ 开始浏览器下载！\n\n📥 共 ${urls.length} 个文件\n💾 文件将保存到浏览器默认下载文件夹\n\n⏱️ 下载间隔0.5秒，请耐心等待`);
+
+        } catch (error) {
+            console.error('下载到本地失败:', error);
+            alert(`❌ 下载失败！\n\n错误信息: ${error.message}`);
+        }
     }
 
     /**
      * 删除下载记录
      */
     async deleteDownload(recordId, index) {
-        if (!confirm('确定要删除这条下载记录吗？')) return;
+        if (!confirm('确定要删除这条下载记录吗？此操作不可恢复。')) return;
         
-        alert(`💡 删除功能\n\n记录ID: ${recordId}\n\n数据库删除功能开发中，记录已从显示中移除。`);
-        this.refreshDownloads();
+        try {
+            // 从数组中删除记录
+            if (index >= 0 && index < this.downloadHistory.length) {
+                const deletedRecord = this.downloadHistory.splice(index, 1)[0];
+                
+                // 更新localStorage
+                localStorage.setItem('download-history', JSON.stringify(this.downloadHistory));
+                
+                // 重新渲染
+                this.renderDownloads();
+                this.updateStats();
+                
+                // 如果有数据库API，可以在这里调用删除
+                // await api.deleteDownloadHistory(recordId);
+                
+                alert(`✅ 删除成功！\n\n已删除: ${deletedRecord.title}\n\n💡 注意: 仅从本地记录中删除，不影响已下载文件`);
+            } else {
+                throw new Error('无效的记录索引');
+            }
+        } catch (error) {
+            console.error('删除记录失败:', error);
+            alert(`❌ 删除失败！\n\n错误信息: ${error.message}`);
+        }
     }
 
     /**
