@@ -606,28 +606,140 @@ class DownloadComponent {
         return new Promise((resolve) => {
             // 创建模态对话框
             const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.className = 'download-location-modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                padding: 20px;
+                animation: fadeIn 0.3s ease-out;
+            `;
             console.log('🔧 对话框DOM元素已创建');
             modal.innerHTML = `
-                <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
-                    <div class="text-center mb-6">
-                        <i class="fas fa-download text-4xl text-blue-500 mb-3"></i>
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">选择下载位置</h3>
-                        <p class="text-gray-600 text-sm">请选择将作品下载到哪里</p>
+                <div style="
+                    background: white;
+                    border-radius: 16px;
+                    padding: 2rem;
+                    max-width: 420px;
+                    width: 100%;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                    transform: scale(0.9);
+                    animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                ">
+                    <!-- 顶部装饰 -->
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="
+                            width: 80px;
+                            height: 80px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            border-radius: 50%;
+                            margin: 0 auto 1.5rem auto;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+                        ">
+                            <i class="fas fa-download" style="color: white; font-size: 2rem;"></i>
+                        </div>
+                        <h3 style="
+                            font-size: 1.5rem;
+                            font-weight: 600;
+                            color: #1f2937;
+                            margin: 0 0 0.5rem 0;
+                        ">选择下载位置</h3>
+                        <p style="
+                            color: #6b7280;
+                            font-size: 0.875rem;
+                            margin: 0;
+                            line-height: 1.5;
+                        ">请选择将作品下载到哪里</p>
                     </div>
                     
-                    <div class="space-y-3">
-                        <button id="download-local" class="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center">
-                            <i class="fas fa-laptop mr-2"></i>
+                    <!-- 按钮组 -->
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <button id="download-local" style="
+                            width: 100%;
+                            padding: 1rem 1.5rem;
+                            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                            color: white;
+                            border: none;
+                            border-radius: 12px;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 0.5rem;
+                            transition: all 0.2s ease;
+                            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(59, 130, 246, 0.4)'" 
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)'">
+                            <i class="fas fa-laptop"></i>
                             下载到本地
                         </button>
-                        <button id="download-server" class="w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center">
-                            <i class="fas fa-server mr-2"></i>
+                        <button id="download-server" style="
+                            width: 100%;
+                            padding: 1rem 1.5rem;
+                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                            color: white;
+                            border: none;
+                            border-radius: 12px;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 0.5rem;
+                            transition: all 0.2s ease;
+                            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.4)'" 
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'">
+                            <i class="fas fa-server"></i>
                             下载到服务器
                         </button>
-                        <button id="download-cancel" class="w-full p-2 text-gray-500 hover:text-gray-700 transition-colors">
+                        <button id="download-cancel" style="
+                            width: 100%;
+                            padding: 0.75rem 1.5rem;
+                            background: #f9fafb;
+                            color: #6b7280;
+                            border: 1px solid #e5e7eb;
+                            border-radius: 12px;
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        " onmouseover="this.style.background='#f3f4f6'; this.style.color='#374151'" 
+                           onmouseout="this.style.background='#f9fafb'; this.style.color='#6b7280'">
                             取消
                         </button>
+                    </div>
+                    
+                    <!-- 底部提示 -->
+                    <div style="
+                        text-align: center;
+                        margin-top: 1.5rem;
+                        padding-top: 1.5rem;
+                        border-top: 1px solid #e5e7eb;
+                    ">
+                        <p style="
+                            color: #9ca3af;
+                            font-size: 0.75rem;
+                            margin: 0;
+                            line-height: 1.4;
+                        ">
+                            <i class="fas fa-info-circle" style="margin-right: 4px;"></i>
+                            本地下载：文件保存到浏览器下载文件夹<br>
+                            服务器下载：文件保存到服务器存储目录
+                        </p>
                     </div>
                 </div>
             `;
