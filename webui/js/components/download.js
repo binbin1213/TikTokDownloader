@@ -499,15 +499,21 @@ class DownloadComponent {
 
             // 第一步：获取作品信息
             await this.getWorkInfoForDownload(workUrl, cookie);
+            console.log('✅ 作品信息获取完成，准备显示下载选择对话框');
             
             // 第二步：弹出下载位置选择对话框
             const downloadChoice = await this.showDownloadLocationDialog();
+            console.log('📍 用户选择下载位置:', downloadChoice);
             
             // 第三步：根据选择执行下载
             if (downloadChoice === 'local') {
+                console.log('📥 开始下载到本地');
                 await this.downloadToLocal();
             } else if (downloadChoice === 'server') {
+                console.log('📤 开始下载到服务器');
                 await this.downloadToServer();
+            } else {
+                console.log('❌ 用户取消下载或选择无效');
             }
             
         } catch (error) {
@@ -595,10 +601,12 @@ class DownloadComponent {
      * 显示下载位置选择对话框
      */
     async showDownloadLocationDialog() {
+        console.log('🎯 开始显示下载位置选择对话框');
         return new Promise((resolve) => {
             // 创建模态对话框
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            console.log('🔧 对话框DOM元素已创建');
             modal.innerHTML = `
                 <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
                     <div class="text-center mb-6">
@@ -624,19 +632,23 @@ class DownloadComponent {
             `;
 
             document.body.appendChild(modal);
+            console.log('✅ 对话框已添加到页面');
 
             // 绑定事件
             modal.querySelector('#download-local').addEventListener('click', () => {
+                console.log('👆 用户选择：下载到本地');
                 document.body.removeChild(modal);
                 resolve('local');
             });
 
             modal.querySelector('#download-server').addEventListener('click', () => {
+                console.log('👆 用户选择：下载到服务器');
                 document.body.removeChild(modal);
                 resolve('server');
             });
 
             modal.querySelector('#download-cancel').addEventListener('click', () => {
+                console.log('👆 用户选择：取消下载');
                 document.body.removeChild(modal);
                 resolve(null);
             });
