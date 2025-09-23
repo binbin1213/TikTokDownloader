@@ -49,6 +49,9 @@ class Extractor:
     live_link_share = compile(
         r"\S*?https://webcast\.amemv\.com/douyin/webcast/reflow/\S+"
     )
+    live_short = compile(
+        r"\S*?https://v\.douyin\.com/([A-Za-z0-9_-]+)/?\S*?"
+    )  # 直播间短链接（与作品短链接格式相同）
 
     channel_link = compile(
         r"\S*?https://www\.douyin\.com/channel/\d+?\?modal_id=(\d{19})\S*?"
@@ -126,17 +129,61 @@ class Extractor:
         share = self.extract_info(self.mix_share, urls, 1)
         return (True, m) if (m := link + share) else (None, [])
 
-    async def live(
+    async def __extract_live_with_short(
         self,
         urls: str,
     ) -> list[str]:
+        # 先提取常规直播链接
         live_link = self.extract_info(self.live_link, urls, 1)
         live_link_self = self.extract_info(self.live_link_self, urls, 1)
         live_link_share = self.extract_info(self.live_link_share, urls, 0)
         live_link_share = [
             await self.get_html_data(i, self.WEB_RID) for i in live_link_share
         ]
-        return live_link + live_link_self + live_link_share
+        
+        # 提取直播间短链接
+        short_matches = self.live_short.finditer(urls)
+        short_live_ids = []
+        
+        # 处理直播间短链接重定向
+        for match in short_matches:
+            short_url = match.group(0)  # 获取完整的匹配URL
+            try:
+                self.log.info(f"🔗 解析直播间短链接: {short_url}")
+                # 通过重定向获取真实URL
+                real_url = await self.requester.request_url(short_url)
+                if real_url:
+                    self.log.info(f"📍 重定向到: {real_url}")
+                    # 从重定向后的URL中提取直播间ID（支持多种格式）
+                    live_ids = []
+                    live_ids.extend(self.extract_info(self.live_link, real_url, 1))  # live.douyin.com
+                    live_ids.extend(self.extract_info(self.live_link_self, real_url, 1))  # follow?webRid=
+                    
+                    if live_ids:
+                        short_live_ids.extend(live_ids)
+                        self.log.info(f"✅ 提取到直播间ID: {live_ids}")
+                    else:
+                        self.log.warning(f"❌ 无法从重定向URL提取直播间ID: {real_url}")
+                        # 作为备选方案，尝试从URL中直接提取数字ID
+                        import re
+                        webrid_match = re.search(r'webRid=(\d+)', real_url)
+                        if webrid_match:
+                            backup_id = webrid_match.group(1)
+                            short_live_ids.append(backup_id)
+                            self.log.info(f"🔄 备选方案提取到ID: {backup_id}")
+                else:
+                    self.log.warning(f"❌ 短链接重定向失败: {short_url}")
+            except Exception as e:
+                self.log.warning(f"❌ 短链接重定向异常: {short_url}, 错误: {e}")
+                continue
+        
+        return live_link + live_link_self + live_link_share + short_live_ids
+
+    async def live(
+        self,
+        urls: str,
+    ) -> list[str]:
+        return await self.__extract_live_with_short(urls)
 
     def __extract_detail(
         self,

@@ -231,14 +231,14 @@ class APIServer(TikTok):
 
         @self.server.post(
             "/extract/work_id",
-            summary=_("提取作品ID（支持短链接）"),
+            summary=_("提取作品/直播间ID（支持短链接）"),
             description=_(
                 dedent("""
-                从输入文本中提取作品ID，支持短链接自动解析
+                从输入文本中提取作品或直播间ID，支持短链接自动解析
                 
                 **参数**:
-                - **text**: 包含作品链接或ID的文本；必需参数
-                - **type**: 提取类型，默认为 'detail'；可选参数
+                - **text**: 包含作品链接或直播间链接的文本；必需参数
+                - **type**: 提取类型，支持 'detail'（作品）、'live'（直播间），默认为 'detail'；可选参数
                 - **proxy**: 代理；可选参数
                 """)
             ),
@@ -249,20 +249,25 @@ class APIServer(TikTok):
             extract: ShortUrl, token: str = Depends(token_dependency)
         ):
             try:
-                # 使用链接提取器解析作品ID
-                work_ids = await self.links.run(extract.text, "detail", extract.proxy)
+                # 使用链接提取器解析ID（支持作品和直播间）
+                extract_type = extract.type if hasattr(extract, 'type') and extract.type else "detail"
+                result_ids = await self.links.run(extract.text, extract_type, extract.proxy)
                 
-                if work_ids:
+                if result_ids:
+                    # 动态设置成功消息
+                    message = _("提取直播间ID成功！") if extract_type == "live" else _("提取作品ID成功！")
                     return {
                         "success": True,
-                        "message": _("提取作品ID成功！"),
-                        "work_ids": work_ids,
+                        "message": message,
+                        "work_ids": result_ids,
                         "params": extract.model_dump(),
                     }
                 else:
+                    # 动态设置失败消息
+                    message = _("未找到有效的直播间ID") if extract_type == "live" else _("未找到有效的作品ID")
                     return {
                         "success": False,
-                        "message": _("未找到有效的作品ID"),
+                        "message": message,
                         "work_ids": [],
                         "params": extract.model_dump(),
                     }

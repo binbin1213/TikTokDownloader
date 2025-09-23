@@ -111,12 +111,37 @@ class LiveComponent {
     /**
      * 从URL中提取直播间ID
      */
-    extractIdFromUrl() {
+    async extractIdFromUrl() {
         const liveUrlInput = document.getElementById('live-url');
         if (!liveUrlInput) return;
 
         const url = liveUrlInput.value.trim();
         if (!url) return;
+
+        // 检查是否为短链接
+        const shortLinkMatch = url.match(/https:\/\/v\.douyin\.com\/([A-Za-z0-9_-]+)/);
+        if (shortLinkMatch) {
+            console.log('🔗 检测到直播间短链接:', shortLinkMatch[0]);
+            try {
+                // 调用后端API解析短链接
+                const result = await api.extractWorkId(url, 'live'); // 使用live类型
+                if (result.success && result.work_ids && result.work_ids.length > 0) {
+                    const liveId = result.work_ids[0];
+                    console.log('🎯 短链接解析成功，提取到直播间ID:', liveId);
+                    liveUrlInput.value = liveId;
+                    this.showPlatformHint('douyin');
+                    return;
+                } else {
+                    console.warn('🔗 直播间短链接解析失败:', result);
+                    alert('⚠️ 无法解析直播间短链接，请尝试使用完整链接');
+                    return;
+                }
+            } catch (error) {
+                console.error('🔗 直播间短链接解析出错:', error);
+                alert('❌ 短链接解析失败，请尝试使用完整链接');
+                return;
+            }
+        }
 
         // 抖音直播间链接模式
         const douyinPatterns = [

@@ -99,12 +99,12 @@ class API {
     // ==================== 链接解析API ====================
     
     /**
-     * 提取作品ID（支持短链接解析）
+     * 提取作品/直播间ID（支持短链接解析）
      */
-    async extractWorkId(text) {
+    async extractWorkId(text, type = 'detail') {
         const data = {
             text: text,
-            type: 'detail'
+            type: type  // 支持 'detail' 或 'live'
         };
         
         return await this.postJSON('/extract/work_id', data);
