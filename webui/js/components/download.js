@@ -46,15 +46,82 @@ class DownloadComponent {
         try {
             const settings = await api.getCookieSettings();
             if (settings.success) {
-                // 不自动填充Cookie，保护用户隐私
-                console.log('全局Cookie已加载，可在需要时使用');
-                this.globalCookieLoaded = true;
-                this.updateCookieInputPlaceholder();
+                // 检查是否有可用的Cookie
+                const hasDYCookie = !!(settings.douyin_cookie && settings.douyin_cookie.length > 10);
+                const hasTTCookie = !!(settings.tiktok_cookie && settings.tiktok_cookie.length > 10);
+                
+                if (hasDYCookie || hasTTCookie) {
+                    console.log('🍪 全局Cookie加载成功：', {
+                        douyin: hasDYCookie ? '✅' : '❌',
+                        tiktok: hasTTCookie ? '✅' : '❌'
+                    });
+                    this.globalCookieLoaded = true;
+                    this.updateCookieInputPlaceholder();
+                    
+                    // 显示成功提示（3秒后消失）
+                    this.showCookieLoadedHint(hasDYCookie, hasTTCookie);
+                } else {
+                    console.warn('🍪 全局Cookie为空，请先在设置中配置Cookie');
+                    this.globalCookieLoaded = false;
+                }
+            } else {
+                console.warn('🍪 获取全局Cookie设置失败');
+                this.globalCookieLoaded = false;
             }
         } catch (error) {
-            console.warn('加载全局Cookie失败:', error);
+            console.warn('🍪 加载全局Cookie失败:', error);
             this.globalCookieLoaded = false;
         }
+    }
+
+    /**
+     * 显示Cookie加载成功提示
+     */
+    showCookieLoadedHint(hasDYCookie, hasTTCookie) {
+        const cookieInput = document.getElementById('work-cookie');
+        if (!cookieInput || !cookieInput.parentNode) return;
+
+        // 创建提示元素
+        const hint = document.createElement('div');
+        hint.style.cssText = `
+            position: absolute;
+            top: -45px;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            z-index: 1000;
+            animation: slideInDown 0.3s ease-out;
+        `;
+        
+        let platforms = [];
+        if (hasDYCookie) platforms.push('抖音');
+        if (hasTTCookie) platforms.push('TikTok');
+        
+        hint.innerHTML = `
+            <i class="fas fa-check-circle mr-2"></i>
+            ${platforms.join('、')} Cookie已自动加载，可直接下载！
+        `;
+
+        // 添加到父容器
+        const container = cookieInput.parentNode;
+        if (container.style.position !== 'relative') {
+            container.style.position = 'relative';
+        }
+        container.appendChild(hint);
+
+        // 3秒后移除
+        setTimeout(() => {
+            if (hint.parentNode) {
+                hint.style.animation = 'slideOutUp 0.3s ease-out';
+                setTimeout(() => hint.remove(), 300);
+            }
+        }, 3000);
     }
 
     /**
@@ -62,8 +129,12 @@ class DownloadComponent {
      */
     updateCookieInputPlaceholder() {
         const cookieInput = document.getElementById('work-cookie');
-        if (cookieInput && this.globalCookieLoaded) {
-            cookieInput.placeholder = '已加载全局Cookie，留空将自动使用 (点击显示按钮查看)';
+        if (cookieInput) {
+            if (this.globalCookieLoaded) {
+                cookieInput.placeholder = '✅ 已加载全局Cookie，可留空自动使用 (点击➤按钮查看)';
+            } else {
+                cookieInput.placeholder = '输入Cookie以获取更多信息...';
+            }
         }
     }
 
@@ -483,7 +554,7 @@ class DownloadComponent {
      */
     async downloadWork() {
         const workUrl = document.getElementById('work-url')?.value.trim();
-        const cookie = document.getElementById('work-cookie')?.value.trim() || '';
+        const inputCookie = document.getElementById('work-cookie')?.value.trim() || '';
         const downloadBtn = document.getElementById('download-work');
 
         if (!workUrl) {
@@ -498,8 +569,19 @@ class DownloadComponent {
                 downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>获取作品信息中...';
             }
 
+            // 获取有效的Cookie（输入的Cookie或全局Cookie）
+            let effectiveCookie = this.getEffectiveCookie(inputCookie);
+            if (!effectiveCookie) {
+                const platform = this.detectPlatform(workUrl);
+                if (platform) {
+                    console.log('🍪 输入框无Cookie，尝试获取全局Cookie...');
+                    effectiveCookie = await this.getGlobalCookie(platform);
+                    console.log('🍪 获取到全局Cookie长度:', effectiveCookie ? effectiveCookie.length : 0);
+                }
+            }
+
             // 第一步：获取作品信息
-            await this.getWorkInfoForDownload(workUrl, cookie);
+            await this.getWorkInfoForDownload(workUrl, effectiveCookie);
             console.log('✅ 作品信息获取完成，准备显示下载选择对话框');
             
             // 第二步：弹出下载位置选择对话框
@@ -547,11 +629,8 @@ class DownloadComponent {
             throw new Error('无法提取作品ID，请确认输入格式正确');
         }
 
-        // 获取最终Cookie
-        let finalCookie = this.getEffectiveCookie(cookie);
-        if (!finalCookie) {
-            finalCookie = await this.getGlobalCookie(platform);
-        }
+        // 使用传入的Cookie（已经在上层处理过）
+        let finalCookie = cookie;
 
         // 调用API获取作品信息
         console.log('🔍 调用API获取作品详情:', {
