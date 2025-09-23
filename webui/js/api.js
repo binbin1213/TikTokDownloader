@@ -69,6 +69,33 @@ class API {
         }
     }
 
+    /**
+     * JSON数据请求
+     */
+    async postJSON(endpoint, data, method = 'POST') {
+        const url = `${this.baseURL}${endpoint}`;
+        
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(this.token && { 'Authorization': `Bearer ${this.token}` })
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('JSON请求失败:', error);
+            throw error;
+        }
+    }
+
     // ==================== 下载相关API ====================
     
     /**
