@@ -250,7 +250,7 @@ class APIServer(TikTok):
         ):
             try:
                 # 使用链接提取器解析作品ID
-                work_ids = await self.extract.run(extract.text, "detail", extract.proxy)
+                work_ids = await self.links.run(extract.text, "detail", extract.proxy)
                 
                 if work_ids:
                     return {
