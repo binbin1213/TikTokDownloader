@@ -123,7 +123,29 @@ class API {
             source: false
         };
 
-        return await this.postJSON(`/${platform}/detail`, data);
+        console.log('🌐 发送API请求:', {
+            endpoint: `/${platform}/detail`,
+            data: {
+                detail_id: workId,
+                hasCookie: !!cookie,
+                cookieLength: cookie ? cookie.length : 0,
+                proxy: proxy || '无代理',
+                source: false
+            }
+        });
+
+        try {
+            const result = await this.postJSON(`/${platform}/detail`, data);
+            console.log('✅ API请求成功:', {
+                success: result.success,
+                message: result.message,
+                hasData: !!result.data
+            });
+            return result;
+        } catch (error) {
+            console.error('❌ API请求失败:', error);
+            throw error;
+        }
     }
 
     /**

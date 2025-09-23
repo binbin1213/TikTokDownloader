@@ -547,12 +547,27 @@ class DownloadComponent {
         }
 
         // 调用API获取作品信息
+        console.log('🔍 调用API获取作品详情:', {
+            platform,
+            workId,
+            hasCookie: !!finalCookie,
+            cookieLength: finalCookie ? finalCookie.length : 0
+        });
+        
         const result = await api.getWorkDetail(platform, workId, finalCookie);
+        
+        console.log('📡 API响应结果:', {
+            success: result.success,
+            message: result.message,
+            hasData: !!result.data,
+            dataKeys: result.data ? Object.keys(result.data) : []
+        });
 
         if (result.message === '获取数据成功！' && result.data) {
             this.currentWorkData = result.data;
             return result.data;
         } else {
+            console.error('❌ API调用失败详情:', result);
             throw new Error(result.message || '获取作品信息失败');
         }
     }
