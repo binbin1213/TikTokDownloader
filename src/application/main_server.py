@@ -2248,6 +2248,7 @@ class APIServer(TikTok):
             message=message or _("获取数据成功！"),
             data=data,
             params=extract.model_dump(),
+            success=True,
         )
 
     @staticmethod
@@ -2259,6 +2260,7 @@ class APIServer(TikTok):
             message=message or _("获取数据失败！"),
             data=None,
             params=extract.model_dump(),
+            success=False,
         )
 
     @staticmethod

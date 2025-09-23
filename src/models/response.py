@@ -7,6 +7,7 @@ class DataResponse(BaseModel):
     message: str
     data: dict | list[dict] | None = None
     params: dict | None
+    success: bool = True
 
     @computed_field
     @property
