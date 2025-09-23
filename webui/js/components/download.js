@@ -419,7 +419,8 @@ class DownloadComponent {
                             <div class="mb-3">
                                 <img src="${data.static_cover || data.dynamic_cover}" 
                                      alt="作品封面" 
-                                     class="w-32 h-32 object-cover rounded-lg border border-gray-200">
+                                     class="max-w-full h-32 object-cover rounded-lg border border-gray-200"
+                                     style="max-width: 100%; width: auto;">
                             </div>
                         ` : ''}
                         

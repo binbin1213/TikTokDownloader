@@ -359,7 +359,8 @@ class LiveComponent {
                             <div class="mb-3">
                                 <img src="${data.cover || data.room_cover}" 
                                      alt="直播间封面" 
-                                     class="w-48 h-32 object-cover rounded-lg border border-gray-200">
+                                     class="max-w-full h-32 object-cover rounded-lg border border-gray-200"
+                                     style="max-width: 100%; width: auto;">
                             </div>
                         ` : ''}
                     </div>
