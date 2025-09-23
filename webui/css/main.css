@@ -143,8 +143,8 @@ body {
 }
 
 .main-content-top > * {
-    width: 100%;
-    max-width: 500px;
+    width: 500px;
+    max-width: 90vw;
     margin: 0 auto;
 }
 
@@ -254,7 +254,8 @@ body {
     }
     
     .main-content-top > * {
-        max-width: 90%;
+        width: 90vw;
+        max-width: 90vw;
     }
     
     .navbar-nav {
