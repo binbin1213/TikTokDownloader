@@ -941,6 +941,7 @@ class APIServer(TikTok):
                 import asyncio
                 import os
                 import json
+                import psutil
                 from pathlib import Path
                 from time import time
                 
