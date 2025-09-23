@@ -27,6 +27,9 @@ class Extractor:
     detail_share = compile(
         r"\S*?https://www\.iesdouyin\.com/share/(?:video|note|slides)/([0-9]{19})/\S*?"
     )  # 作品分享链接
+    detail_short = compile(
+        r"\S*?https://v\.douyin\.com/([A-Za-z0-9_-]+)/?\S*?"
+    )  # 作品短链接
     detail_search = compile(
         r"\S*?https://www\.douyin\.com/search/\S+?modal_id=(\d{19})\S*?"
     )  # 搜索作品链接
@@ -57,6 +60,7 @@ class Extractor:
         tiktok=False,
     ):
         self.client = params.client_tiktok if tiktok else params.client
+        self.log = params.logger
         self.requester = Requester(
             params,
             self.client,
@@ -74,7 +78,7 @@ class Extractor:
         )
         match type_:
             case "detail":
-                return self.detail(text)
+                return await self.detail(text)
             case "user":
                 return self.user(text)
             case "mix":
@@ -98,11 +102,11 @@ class Extractor:
         data = pattern.search(html or "")
         return data.group(index) if data else ""
 
-    def detail(
+    async def detail(
         self,
         urls: str,
     ) -> list[str]:
-        return self.__extract_detail(urls)
+        return await self.__extract_detail_with_short(urls)
 
     def user(
         self,
@@ -145,6 +149,33 @@ class Extractor:
         discover = self.extract_info(self.detail_discover, urls, 1)
         channel = self.extract_info(self.channel_link, urls, 1)
         return link + share + account + search + discover + channel
+
+    async def __extract_detail_with_short(
+        self,
+        urls: str,
+    ) -> list[str]:
+        # 先提取常规链接
+        regular_ids = self.__extract_detail(urls)
+        
+        # 提取短链接
+        short_matches = self.detail_short.finditer(urls)
+        short_ids = []
+        
+        # 处理短链接重定向
+        for match in short_matches:
+            short_url = match.group(0)  # 获取完整的匹配URL
+            try:
+                # 通过重定向获取真实URL
+                real_url = await self.requester.request_url(short_url)
+                if real_url:
+                    # 从重定向后的URL中提取作品ID
+                    real_ids = self.__extract_detail(real_url)
+                    short_ids.extend(real_ids)
+            except Exception as e:
+                self.log.warning(f"短链接重定向失败: {short_url}, 错误: {e}")
+                continue
+        
+        return regular_ids + short_ids
 
     @staticmethod
     def extract_sec_user_id(urls: list[str]) -> list[list]:
